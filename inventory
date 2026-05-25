@@ -1,4 +1,4 @@
-web:
+web_servers:
   hosts:
     srv1:
       ansible_host: 192.168.122.11
@@ -6,17 +6,17 @@ web:
       ansible_host: 192.168.122.12
     srv5:
       ansible_host: 192.168.122.15
-db:
+db_servers:
   hosts:
     srv3:
       ansible_host: 192.168.122.13
     srv5:
       ansible_host: 192.168.122.15
-file:
+file_servers:
   hosts:
     srv4:
       ansible_host: 192.168.122.14
-workstation:
+workstations:
   hosts:
     wrk:
       ansible_host: 192.168.122.16

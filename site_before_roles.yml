@@ -1,0 +1,141 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: copy resolv.conf file (Debain)
+    tags: dns
+    copy:
+      src: resolv.conf
+      dest: /etc/resolv.conf
+      owner: root
+      group: root
+      mode: 0644
+    when: ansible_distribution in ["Debian"]
+
+  - name: update repo cache (Rocky)
+    tags: always
+    dnf:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution in ["Rocky"]
+
+  - name: update repo cache (Debian)
+    tags: always
+    apt:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution in ["Debian"]
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICThFcIM4cl3XzTQiXyLZNK1pmQDW1YUnc0azQv0Beh7 ansible"
+
+- hosts: workstation
+  become: true
+  tasks:
+
+  - name: install unzip
+    package:
+      name: unzip
+      state: latest
+
+  - name: install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/1.15.4/terraform_1.15.4_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root
+
+- hosts: web
+  become: true
+  tasks:
+
+  - name: install apache and php for Debian
+    tags: apache,apache2,debian
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when: ansible_distribution in ["Debian"]
+
+  - name: install apache and php for Rocky
+    tags: apache,rocky,httpd
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+    when: ansible_distribution in ["Rocky"]
+
+  - name: start httpd (Rocky)
+    tags: httpd,apache,rocky
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution in ["Rocky"]
+
+  - name: change e-mail address for admin
+    tags: apache,rocky,httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin somebody@somewhere.net
+    when: ansible_distribution in ["Rocky"]
+    register: httpd
+
+  - name: restart httpd (Rocky)
+    tags: apache,rocky,httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
+
+  - name: copy default html file for site
+    tags: apache,apache2,httpd
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
+- hosts: db
+  become: true
+  tasks:
+
+  - name: install mariadb package (Debian)
+    tags: mariadb,db,debian
+    apt:
+      name: mariadb-server
+      state: latest
+    when: ansible_distribution in ["Debian"]
+
+  - name: install mariadb package (Rocky)
+    tags: mariadb,db,rocky
+    dnf:
+      name:
+        - mariadb
+        - mariadb-server
+      state: latest
+    when: ansible_distribution in ["Rocky"]
+
+- hosts: file
+  become: yes
+  tasks:
+
+  - name: install samba package
+    tags: samba
+    package:
+      name: samba
