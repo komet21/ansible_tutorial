@@ -4,6 +4,16 @@
   become: true
   pre_tasks:
 
+  - name: copy resolv.conf file (Debain)
+    tags: dns
+    copy:
+      src: resolv.conf
+      dest: /etc/resolv.conf
+      owner: root
+      group: root
+      mode: 0644
+    when: ansible_distribution in ["Debian"]
+
   - name: install updates (Rocky)
     tags: always
     dnf:
