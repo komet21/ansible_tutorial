@@ -2,11 +2,21 @@ myhosts:
   hosts:
     srv1:
       ansible_host: 192.168.122.11
+      apache_package: apache2
+      php_package: libapache2-mod-php
     srv2:
       ansible_host: 192.168.122.12
+      apache_package: apache2
+      php_package: libapache2-mod-php
     srv3:
       ansible_host: 192.168.122.13
+      apache_package: apache2
+      php_package: libapache2-mod-php
     srv4:
       ansible_host: 192.168.122.14
+      apache_package: apache2
+      php_package: libapache2-mod-php
     srv5:
       ansible_host: 192.168.122.15
+      apache_package: httpd
+      php_package: php
