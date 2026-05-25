@@ -14,19 +14,29 @@
       mode: 0644
     when: ansible_distribution in ["Debian"]
 
-  - name: install updates (Rocky)
+  - name: update repo cache (Rocky)
     tags: always
     dnf:
-      update_only: yes
       update_cache: yes
+    changed_when: false
     when: ansible_distribution in ["Rocky"]
 
-  - name: install updates (Debian)
+  - name: update repo cache (Debian)
     tags: always
     apt:
-      upgrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution in ["Debian"]
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICThFcIM4cl3XzTQiXyLZNK1pmQDW1YUnc0azQv0Beh7 ansible"
 
 - hosts: workstation
   become: true
