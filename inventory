@@ -16,3 +16,7 @@ file:
   hosts:
     srv4:
       ansible_host: 192.168.122.14
+workstation:
+  hosts:
+    wrk:
+      ansible_host: 192.168.122.16

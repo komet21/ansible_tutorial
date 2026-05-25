@@ -28,6 +28,24 @@
       update_cache: yes
     when: ansible_distribution in ["Debian"]
 
+- hosts: workstation
+  become: true
+  tasks:
+
+  - name: install unzip
+    package:
+      name: unzip
+      state: latest
+
+  - name: install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/1.15.4/terraform_1.15.4_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root
+
 - hosts: web
   become: true
   tasks:
@@ -49,6 +67,30 @@
         - php
       state: latest
     when: ansible_distribution in ["Rocky"]
+
+  - name: start httpd (Rocky)
+    tags: httpd,apache,rocky
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution in ["Rocky"]
+
+  - name: change e-mail address for admin
+    tags: apache,rocky,httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin somebody@somewhere.net
+    when: ansible_distribution in ["Rocky"]
+    register: httpd
+
+  - name: restart httpd (Rocky)
+    tags: apache,rocky,httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
 
   - name: copy default html file for site
     tags: apache,apache2,httpd
